@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>研究样本概况表</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px 30px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        .header p {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        .table-container {
+            padding: 20px;
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        th {
+            background-color: #3498db;
+            color: white;
+            font-weight: 600;
+            text-align: left;
+            padding: 12px 15px;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        th:last-child {
+            border-right: none;
+        }
+        td {
+            padding: 10px 15px;
+            border-bottom: 1px solid #eaeaea;
+            vertical-align: top;
+        }
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        tr:hover {
+            background-color: #f1f8ff;
+            transition: background-color 0.2s;
+        }
+        .category-header {
+            background-color: #e8f4fc !important;
+            font-weight: bold;
+            font-size: 15px;
+            border-left: 4px solid #3498db;
+        }
+        .category-header td:first-child {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .sub-row td:first-child {
+            padding-left: 30px;
+            color: #7f8c8d;
+        }
+        .highlight {
+            background-color: #fff9e6;
+        }
+        .number {
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+            font-weight: 500;
+        }
+        .percentage {
+            color: #e74c3c;
+            font-weight: 500;
+        }
+        .footnote {
+            padding: 15px 20px;
+            background-color: #f8f9fa;
+            border-top: 1px solid #eaeaea;
+            font-size: 13px;
+            color: #7f8c8d;
+            line-height: 1.4;
+        }
+        .actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            padding: 20px;
+        }
+        .btn {
+            padding: 8px 20px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+        .btn:hover {
+            background: #2980b9;
+        }
+        .btn-print {
+            background: #2c3e50;
+        }
+        .btn-print:hover {
+            background: #1a252f;
+        }
+        
+        @media screen and (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            .container {
+                border-radius: 8px;
+            }
+            .header {
+                padding: 15px 20px;
+            }
+            .header h1 {
+                font-size: 20px;
+            }
+            .table-container {
+                padding: 10px;
+            }
+            table {
+                font-size: 13px;
+            }
+            th, td {
+                padding: 8px 10px;
+            }
+        }
+        
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .container {
+                box-shadow: none;
+                border-radius: 0;
+            }
+            .actions {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>研究样本概况表</h1>
+            <p>新闻数据分析研究样本特征汇总（2000-2025）</p>
+        </div>
+        
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 20%;">分类</th>
+                        <th style="width: 25%;">关键指标</th>
+                        <th style="width: 20%;">数值/分布</th>
+                        <th style="width: 35%;">说明/特征</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- 样本基本信息 -->
+                    <tr class="category-header">
+                        <td rowspan="3">样本基本信息</td>
+                        <td>总样本量</td>
+                        <td class="number">21,769 条</td>
+                        <td>经清洗与增强后的有效数据量，确保统计显著性</td>
+                    </tr>
+                    <tr class="sub-row">
+                        <td>时间跨度</td>
+                        <td class="number">2000 - 2025 (26年)</td>
+                        <td>涵盖26个年份，保证数据时效性与历史纵深</td>
+                    </tr>
+                    <tr class="sub-row">
+                        <td>信源数量</td>
+                        <td class="number">12 个</td>
+                        <td>主要新闻来源分布，增强研究的客观性和代表性</td>
+                    </tr>
+                    
+                    <!-- 时间分布 -->
+                    <tr class="category-header">
+                        <td rowspan="3">时间分布</td>
+                        <td>2010-2014</td>
+                        <td class="number">1,718 <span class="percentage">(7.89%)</span></td>
+                        <td>样本量相对较少，数据积累期</td>
+                    </tr>
+                    <tr class="sub-row">
+                        <td>2015-2019</td>
+                        <td class="number">2,020 <span class="percentage">(9.28%)</span></td>
+                        <td>样本量稳步增长，数据发展期</td>
+                    </tr>
+                    <tr class="sub-row highlight">
+                        <td>2020-2025</td>
+                        <td class="number">17,931 <span class="percentage">(82.37%)</span></td>
+                        <td>样本量高度集中，为主要分析期</td>
+                    </tr>
+                    
+                    <!-- 主要信源分布 -->
+                    <tr class="category-header">
+                        <td rowspan="6">主要信源分布<br><span style="font-size: 12px; font-weight: normal;">(前5位，按样本量)</span></td>
+                        <td>1. Unknown Source</td>
+                        <td class="number">9,657 <span class="percentage">(44.36%)</span></td>
+                        <td>主要新闻来源，占比最高</td>
+                    </tr>
+                    <tr class="sub-row">
+                        <td>2. allafrica.com</td>
+                        <td class="number">1,893 <span class="percentage">(8.70%)</span></td>
+                        <td>非洲地区综合性新闻来源</td>
+                    </tr>
+                    <tr class="sub-row">
+                        <td>3. africanews.com</td>
+                        <td class="number">1,620 <span class="percentage">(7.44%)</span></td>
+                        <td>泛非洲新闻媒体</td>
+                    </tr>
+                    <tr class="sub-row">
+                        <td>4. africa-confidential.com</td>
+                        <td class="number">1,616 <span class="percentage">(7.42%)</span></td>
+                        <td>非洲事务分析平台</td>
+                    </tr>
+                    <tr class="sub-row">
+                        <td>5. africaintelligence.com</td>
+                        <td class="number">1,566 <span class="percentage">(7.19%)</span></td>
+                        <td>非洲情报分析来源</td>
+                    </tr>
+                    <tr class="sub-row">
+                        <td>其他信源 (7个)</td>
+                        <td class="number">约 3,581 <span class="percentage">(约16.44%)</span></td>
+                        <td>次要新闻来源，合计占比较小</td>
+                    </tr>
+                    
+                    <!-- 情感分布 -->
+                    <tr class="category-header">
+                        <td rowspan="3">情感分布</td>
+                        <td>中性 (neutral)</td>
+                        <td class="number">15,121 <span class="percentage">(69.46%)</span></td>
+                        <td>主导情感类型，占样本大多数</td>
+                    </tr>
+                    <tr class="sub-row">
+                        <td>积极 (positive)</td>
+                        <td class="number">3,576 <span class="percentage">(16.43%)</span></td>
+                        <td>次要情感类型，占比适中</td>
+                    </tr>
+                    <tr class="sub-row">
+                        <td>消极 (negative)</td>
+                        <td class="number">3,072 <span class="percentage">(14.11%)</span></td>
+                        <td>占比最小，与积极情感接近</td>
+                    </tr>
+                    
+                    <!-- 情感强度统计 -->
+                    <tr class="category-header">
+                        <td>情感强度统计</td>
+                        <td>平均值 ± 标准差</td>
+                        <td class="number">0.0475 ± 0.1619</td>
+                        <td>所有样本的情感强度统计，整体略偏向积极</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="footnote">
+            <p>注：本表格展示了研究样本的基本概况。样本总量为21,769条，时间跨度为2000年至2025年。数据分布显示，近期样本(2020-2025)占主导地位(82.37%)。情感分析表明中性情感占比最高(69.46%)。</p>
+        </div>
+        
+        <div class="actions">
+            <button class="btn" onclick="window.print()">打印表格</button>
+            <button class="btn btn-print" onclick="downloadAsPDF()">保存为PDF</button>
+        </div>
+    </div>
+
+    <script>
+        // 简单的PDF下载功能（实际使用可能需要更复杂的实现）
+        function downloadAsPDF() {
+            alert('在实际应用中，这里会使用jsPDF等库将表格转换为PDF。当前为演示版本。');
+            // 实际实现可能类似：
+            // const { jsPDF } = window.jspdf;
+            // const doc = new jsPDF();
+            // doc.html(document.querySelector('.container'), {
+            //   callback: function (doc) {
+            //     doc.save('研究样本概况表.pdf');
+            //   },
+            //   x: 10,
+            //   y: 10
+            // });
+        }
+        
+        // 添加打印样式
+        const style = document.createElement('style');
+        style.textContent = `
+            @media print {
+                body * {
+                    visibility: hidden;
+                }
+                .container, .container * {
+                    visibility: visible;
+                }
+                .container {
+                    position: absolute;
+                    left: 0;
+                    top: 0;
+                    width: 100%;
+                    box-shadow: none;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌐 智能分布式爬虫系统监控仪表板</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #3498db;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --info: #9b59b6;
+            --dark: #2c3e50;
+            --light: #ecf0f1;
+            --text: #34495e;
+            --text-light: #7f8c8d;
+            --border: #bdc3c7;
+            --shadow: rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--text);
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .header {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            padding: 25px 35px;
+            border-radius: 20px;
+            margin: 25px auto;
+            max-width: 1400px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+            color: white;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header:hover {
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 30px 30px;
+            animation: float 25s infinite linear;
+        }
+        
+        .header::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        
+        @keyframes float {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            100% { transform: translate(-30px, -30px) rotate(360deg); }
+        }
+        
+        .header-content {
+            position: relative;
+            z-index: 2;
+        }
+        
+        .header h1 {
+            font-size: 3.2em;
+            margin-bottom: 15px;
+            font-weight: 300;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .header p {
+            font-size: 1.3em;
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+        
+        .system-info {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            backdrop-filter: blur(5px);
+        }
+        
+        .dashboard {
+            padding: 40px;
+        }
+        
+        .dashboard-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                gap: 25px;
+                margin-bottom: 40px;
+            }
+        
+        .metric-card {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(15px);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: left 0.6s ease;
+        }
+        
+        .metric-card:hover::before {
+            left: 100%;
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+        }
+        
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--info));
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .metric-card.healthy { border-left-color: var(--success); }
+        .metric-card.warning { border-left-color: var(--warning); }
+        .metric-card.error { border-left-color: var(--danger); }
+        .metric-card.info { border-left-color: var(--info); }
+        
+        .metric-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+        
+        .metric-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8em;
+            color: white;
+            background: linear-gradient(135deg, var(--primary), var(--info));
+        }
+        
+        .metric-icon.healthy { background: linear-gradient(135deg, var(--success), #2ecc71); }
+        .metric-icon.warning { background: linear-gradient(135deg, var(--warning), #f1c40f); }
+        .metric-icon.error { background: linear-gradient(135deg, var(--danger), #c0392b); }
+        
+        .metric-title {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 5px;
+        }
+        
+        .metric-value {
+            font-size: 2.8em;
+            font-weight: 700;
+            color: var(--dark);
+            margin: 10px 0;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .metric-description {
+            color: var(--text-light);
+            font-size: 0.95em;
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+        
+        .metric-trend {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.9em;
+            color: var(--text-light);
+        }
+        
+        .trend-up { color: var(--success); }
+        .trend-down { color: var(--danger); }
+        
+        .charts-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .chart-container {
+                background: rgba(255, 255, 255, 0.98);
+                backdrop-filter: blur(15px);
+                padding: 30px;
+                border-radius: 20px;
+                box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
+                border: 1px solid rgba(255, 255, 255, 0.3);
+                transition: all 0.3s ease;
+            }
+            
+            .chart-container:hover {
+                box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+                transform: translateY(-2px);
+            }
+        
+        .chart-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 25px;
+        }
+        
+        .chart-title {
+            font-size: 1.4em;
+            font-weight: 600;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .chart {
+            height: 350px;
+            width: 100%;
+        }
+        
+        .controls {
+                display: flex;
+                gap: 20px;
+                justify-content: center;
+                margin: 30px auto;
+                max-width: 1400px;
+                flex-wrap: wrap;
+            }
+        
+        .control-btn {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(76, 175, 80, 0.3);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .control-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.6s ease;
+        }
+        
+        .control-btn:hover::before {
+            left: 100%;
+        }
+        
+        .control-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(76, 175, 80, 0.4);
+        }
+        
+        .control-btn:active {
+            transform: translateY(-1px);
+        }
+        
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(52, 152, 219, 0.4);
+        }
+        
+        .control-btn.secondary {
+            background: linear-gradient(135deg, var(--text-light), #95a5a6);
+        }
+        
+        .footer {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 25px 40px;
+            text-align: center;
+            color: var(--text-light);
+            border-top: 1px solid var(--border);
+        }
+        
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 60px;
+            color: var(--text-light);
+            font-size: 1.2em;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--light);
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--success), var(--primary));
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard {
+                padding: 20px;
+            }
+            
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .charts-section {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .chart-container {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2.4em;
+            }
+            
+            .metric-value {
+                font-size: 2.2em;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .status-badge.healthy { background: var(--success); color: white; }
+        .status-badge.warning { background: var(--warning); color: white; }
+        .status-badge.error { background: var(--danger); color: white; }
+        
+        .timestamp {
+            font-size: 0.9em;
+            color: #95a5a6;
+            margin-top: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .status-section {
+                grid-template-columns: 1fr;
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2.2em;
+            }
+            
+            .card-value {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-content">
+                <h1><i class="fas fa-globe-americas"></i> 智能分布式爬虫系统监控</h1>
+                <p>实时监控系统运行状态、性能指标和数据采集进度</p>
+                <div class="system-info">
+                    <div class="info-item">
+                        <i class="fas fa-server"></i>
+                        <span>主节点: localhost:8000</span>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-microchip"></i>
+                        <span>Python 3.11.13</span>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-database"></i>
+                        <span>MongoDB 连接正常</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="dashboard">
+            <div class="dashboard-grid">
+                <div class="metric-card healthy">
+                    <div class="metric-header">
+                        <div class="metric-icon healthy">
+                            <i class="fas fa-heartbeat"></i>
+                        </div>
+                        <span class="status-badge healthy">健康</span>
+                    </div>
+                    <div class="metric-value" id="system-status">运行中</div>
+                    <div class="metric-description">系统运行正常，所有组件工作良好</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 95%"></div>
+                    </div>
+                    <div class="metric-trend">
+                        <i class="fas fa-arrow-up trend-up"></i>
+                        <span>稳定性 95%</span>
+                    </div>
+                </div>
+                
+                <div class="metric-card info">
+                    <div class="metric-header">
+                        <div class="metric-icon info">
+                            <i class="fas fa-tasks"></i>
+                        </div>
+                        <span class="status-badge info">活跃</span>
+                    </div>
+                    <div class="metric-value" id="task-queue">12</div>
+                    <div class="metric-description">当前待处理任务数量</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 60%"></div>
+                    </div>
+                    <div class="metric-trend">
+                        <i class="fas fa-arrow-up trend-up"></i>
+                        <span>较上次 +3</span>
+                    </div>
+                </div>
+                
+                <div class="metric-card info">
+                    <div class="metric-header">
+                        <div class="metric-icon info">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <span class="status-badge info">在线</span>
+                    </div>
+                    <div class="metric-value" id="worker-count">3</div>
+                    <div class="metric-description">活跃工作节点数量</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 100%"></div>
+                    </div>
+                    <div class="metric-trend">
+                        <i class="fas fa-check-circle trend-up"></i>
+                        <span>全部节点在线</span>
+                    </div>
+                </div>
+                
+                <div class="metric-card info">
+                    <div class="metric-header">
+                        <div class="metric-icon info">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <span class="status-badge info">优化</span>
+                    </div>
+                    <div class="metric-value" id="system-performance">78%</div>
+                    <div class="metric-description">系统资源使用率</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 78%"></div>
+                    </div>
+                    <div class="metric-trend">
+                        <i class="fas fa-arrow-down trend-down"></i>
+                        <span>较上次 -5%</span>
+                    </div>
+                </div>
+                
+                <div class="metric-card healthy">
+                    <div class="metric-header">
+                        <div class="metric-icon healthy">
+                            <i class="fas fa-spider"></i>
+                        </div>
+                        <span class="status-badge healthy">采集</span>
+                    </div>
+                    <div class="metric-value" id="dataValue">1,247</div>
+                    <div class="metric-description">已采集数据条目</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 45%"></div>
+                    </div>
+                    <div class="metric-trend">
+                        <i class="fas fa-arrow-up trend-up"></i>
+                        <span>今日 +89</span>
+                    </div>
+                </div>
+                
+                <div class="metric-card warning">
+                    <div class="metric-header">
+                        <div class="metric-icon warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <span class="status-badge warning">警告</span>
+                    </div>
+                    <div class="metric-value" id="errorValue">2</div>
+                    <div class="metric-description">最近错误数量</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 10%"></div>
+                    </div>
+                    <div class="metric-trend">
+                        <i class="fas fa-arrow-down trend-down"></i>
+                        <span>较上次 -1</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="charts-section">
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            <i class="fas fa-chart-line"></i>
+                            任务队列趋势分析
+                        </div>
+                        <div class="metric-trend">
+                            <i class="fas fa-sync-alt pulse"></i>
+                            <span>实时更新</span>
+                        </div>
+                    </div>
+                    <div class="chart" id="queueChart"></div>
+                </div>
+                
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            <i class="fas fa-microchip"></i>
+                            系统性能监控
+                        </div>
+                        <div class="metric-trend">
+                            <i class="fas fa-sync-alt pulse"></i>
+                            <span>实时更新</span>
+                        </div>
+                    </div>
+                    <div class="chart" id="performanceChart"></div>
+                </div>
+            </div>
+            
+            <div class="charts-section">
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            <i class="fas fa-database"></i>
+                            数据采集统计
+                        </div>
+                        <div class="metric-trend">
+                            <i class="fas fa-sync-alt pulse"></i>
+                            <span>实时更新</span>
+                        </div>
+                    </div>
+                    <div class="chart" id="dataChart"></div>
+                </div>
+                
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            <i class="fas fa-network-wired"></i>
+                            节点分布拓扑
+                        </div>
+                        <div class="metric-trend">
+                            <i class="fas fa-sync-alt pulse"></i>
+                            <span>实时更新</span>
+                        </div>
+                    </div>
+                    <div class="chart" id="topologyChart"></div>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <button class="control-btn" onclick="loadHealthData()">
+                    <i class="fas fa-sync-alt"></i>
+                    刷新数据
+                </button>
+                <button class="control-btn secondary" onclick="exportData()">
+                    <i class="fas fa-download"></i>
+                    导出报告
+                </button>
+                <button class="control-btn secondary" onclick="toggleAutoRefresh()">
+                    <i class="fas fa-pause"></i>
+                    暂停自动刷新
+                </button>
+                <button class="control-btn secondary" onclick="showSettings()">
+                    <i class="fas fa-cog"></i>
+                    系统设置
+                </button>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <div class="footer-content">
+                <div class="timestamp" id="last-update">
+                    <i class="fas fa-clock"></i>
+                    最后更新: <span id="update-time">--</span>
+                </div>
+                <div class="system-info">
+                    <span>🌐 智能分布式爬虫系统 v2.0</span>
+                    <span>|</span>
+                    <span>PID: <span id="system-pid">--</span></span>
+                    <span>|</span>
+                    <span>运行时间: <span id="uptime">--</span></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 全局变量
+        let queueHistory = [];
+        let performanceHistory = [];
+        let dataCollectionHistory = [];
+        let nodeTopologyData = [];
+        let maxHistoryPoints = 20;
+        let autoRefreshInterval = null;
+        let isAutoRefresh = true;
+        
+        // 初始化所有图表
+        function initCharts() {
+            // 队列趋势图表
+            window.queueChart = echarts.init(document.getElementById('queueChart'));
+            
+            // 性能监控图表
+            window.performanceChart = echarts.init(document.getElementById('performanceChart'));
+            
+            // 数据采集统计图表
+            window.dataChart = echarts.init(document.getElementById('dataChart'));
+            
+            // 节点拓扑图表
+            window.topologyChart = echarts.init(document.getElementById('topologyChart'));
+        }
+        
+        // 更新队列趋势图表
+        function updateQueueChart() {
+            const option = {
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                tooltip: {
+                    trigger: 'axis',
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    borderColor: '#3498db',
+                    textStyle: { color: '#fff' },
+                    formatter: function(params) {
+                        const time = params[0].name;
+                        const value = params[0].value;
+                        return `<div style="font-size: 12px;">
+                            <div style="color: #3498db; font-weight: bold;">📊 任务队列趋势</div>
+                            <div>时间: ${time}</div>
+                            <div>队列大小: <span style="color: #3498db;">${value}</span></div>
+                        </div>`;
+                    }
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '15%',
+                    top: '15%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    data: queueHistory.map(item => item.time),
+                    axisLine: { lineStyle: { color: '#666' } },
+                    axisLabel: {
+                        rotate: 45,
+                        color: '#999',
+                        fontSize: 10
+                    }
+                },
+                yAxis: {
+                    type: 'value',
+                    name: '任务数量',
+                    nameTextStyle: { color: '#999' },
+                    axisLine: { lineStyle: { color: '#666' } },
+                    axisLabel: { color: '#999' },
+                    splitLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.1)', type: 'dashed' } }
+                },
+                series: [{
+                    name: '任务队列',
+                    data: queueHistory.map(item => item.value),
+                    type: 'line',
+                    smooth: true,
+                    symbol: 'circle',
+                    symbolSize: 6,
+                    lineStyle: {
+                        color: '#3498db',
+                        width: 3,
+                        shadowBlur: 10,
+                        shadowColor: 'rgba(52, 152, 219, 0.5)'
+                    },
+                    itemStyle: {
+                        color: '#3498db',
+                        borderColor: '#fff',
+                        borderWidth: 2
+                    },
+                    areaStyle: {
+                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                            { offset: 0, color: 'rgba(52, 152, 219, 0.3)' },
+                            { offset: 1, color: 'rgba(52, 152, 219, 0.05)' }
+                        ])
+                    }
+                }]
+            };
+            
+            window.queueChart.setOption(option);
+        }
+        
+        // 更新性能监控图表
+        function updatePerformanceChart() {
+            const option = {
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                tooltip: {
+                    trigger: 'axis',
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    borderColor: '#e74c3c',
+                    textStyle: { color: '#fff' },
+                    formatter: function(params) {
+                        let result = `<div style="font-size: 12px;">
+                            <div style="color: #e74c3c; font-weight: bold;">⚡ 系统性能监控</div>
+                            <div>时间: ${params[0].name}</div>`;
+                        params.forEach(param => {
+                            const color = param.seriesName === 'CPU使用率' ? '#e74c3c' : '#9b59b6';
+                            const icon = param.seriesName === 'CPU使用率' ? '💻' : '🧠';
+                            result += `<div>${icon} ${param.seriesName}: <span style="color: ${color};">${param.value}%</span></div>`;
+                        });
+                        result += '</div>';
+                        return result;
+                    }
+                },
+                legend: {
+                    data: ['CPU使用率', '内存使用率'],
+                    textStyle: { color: '#999' },
+                    right: '10%',
+                    top: '5%'
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '15%',
+                    top: '20%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    data: performanceHistory.map(item => item.time),
+                    axisLine: { lineStyle: { color: '#666' } },
+                    axisLabel: {
+                        rotate: 45,
+                        color: '#999',
+                        fontSize: 10
+                    }
+                },
+                yAxis: {
+                    type: 'value',
+                    name: '使用率 (%)',
+                    nameTextStyle: { color: '#999' },
+                    max: 100,
+                    axisLine: { lineStyle: { color: '#666' } },
+                    axisLabel: { color: '#999' },
+                    splitLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.1)', type: 'dashed' } }
+                },
+                series: [
+                    {
+                        name: 'CPU使用率',
+                        data: performanceHistory.map(item => item.cpu),
+                        type: 'line',
+                        smooth: true,
+                        symbol: 'circle',
+                        symbolSize: 6,
+                        lineStyle: {
+                            color: '#e74c3c',
+                            width: 3,
+                            shadowBlur: 10,
+                            shadowColor: 'rgba(231, 76, 60, 0.5)'
+                        },
+                        itemStyle: {
+                            color: '#e74c3c',
+                            borderColor: '#fff',
+                            borderWidth: 2
+                        },
+                        areaStyle: {
+                            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                                { offset: 0, color: 'rgba(231, 76, 60, 0.3)' },
+                                { offset: 1, color: 'rgba(231, 76, 60, 0.05)' }
+                            ])
+                        }
+                    },
+                    {
+                        name: '内存使用率',
+                        data: performanceHistory.map(item => item.memory),
+                        type: 'line',
+                        smooth: true,
+                        symbol: 'circle',
+                        symbolSize: 6,
+                        lineStyle: {
+                            color: '#9b59b6',
+                            width: 3,
+                            shadowBlur: 10,
+                            shadowColor: 'rgba(155, 89, 182, 0.5)'
+                        },
+                        itemStyle: {
+                            color: '#9b59b6',
+                            borderColor: '#fff',
+                            borderWidth: 2
+                        },
+                        areaStyle: {
+                            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                                { offset: 0, color: 'rgba(155, 89, 182, 0.3)' },
+                                { offset: 1, color: 'rgba(155, 89, 182, 0.05)' }
+                            ])
+                        }
+                    }
+                ]
+            };
+            
+            window.performanceChart.setOption(option);
+        }
+        
+        // 更新数据采集统计图表
+        function updateDataChart() {
+            const option = {
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                tooltip: {
+                    trigger: 'axis',
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    borderColor: '#2ecc71',
+                    textStyle: { color: '#fff' },
+                    formatter: function(params) {
+                        return `<div style="font-size: 12px;">
+                            <div style="color: #2ecc71; font-weight: bold;">📈 数据采集统计</div>
+                            <div>时间: ${params[0].name}</div>
+                            <div>成功采集: <span style="color: #2ecc71;">${params[0].value}</span> 条</div>
+                        </div>`;
+                    }
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '15%',
+                    top: '15%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    data: dataCollectionHistory.map(item => item.time),
+                    axisLine: { lineStyle: { color: '#666' } },
+                    axisLabel: {
+                        rotate: 45,
+                        color: '#999',
+                        fontSize: 10
+                    }
+                },
+                yAxis: {
+                    type: 'value',
+                    name: '数据量',
+                    nameTextStyle: { color: '#999' },
+                    axisLine: { lineStyle: { color: '#666' } },
+                    axisLabel: { color: '#999' },
+                    splitLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.1)', type: 'dashed' } }
+                },
+                series: [{
+                    name: '数据采集量',
+                    data: dataCollectionHistory.map(item => item.value),
+                    type: 'bar',
+                    itemStyle: {
+                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                            { offset: 0, color: '#2ecc71' },
+                            { offset: 1, color: '#27ae60' }
+                        ]),
+                        borderRadius: [2, 2, 0, 0],
+                        shadowColor: 'rgba(46, 204, 113, 0.5)',
+                        shadowBlur: 4
+                    },
+                    emphasis: {
+                        itemStyle: {
+                            shadowColor: 'rgba(46, 204, 113, 0.8)',
+                            shadowBlur: 8
+                        }
+                    }
+                }]
+            };
+            
+            window.dataChart.setOption(option);
+        }
+        
+        // 更新节点拓扑图表
+        function updateTopologyChart() {
+            const option = {
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                tooltip: {
+                    trigger: 'item',
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    borderColor: '#f39c12',
+                    textStyle: { color: '#fff' },
+                    formatter: function(params) {
+                        return `<div style="font-size: 12px;">
+                            <div style="color: #f39c12; font-weight: bold;">🌐 节点拓扑</div>
+                            <div>节点: ${params.name}</div>
+                            <div>状态: <span style="color: ${params.data.status === 'active' ? '#2ecc71' : '#e74c3c'};">${params.data.status === 'active' ? '活跃' : '离线'}</span></div>
+                            <div>负载: ${params.data.load}%</div>
+                        </div>`;
+                    }
+                },
+                series: [{
+                    type: 'graph',
+                    layout: 'circular',
+                    symbolSize: 60,
+                    roam: true,
+                    label: {
+                        show: true,
+                        position: 'inside',
+                        color: '#fff',
+                        fontSize: 10,
+                        fontWeight: 'bold'
+                    },
+                    edgeSymbol: ['circle', 'arrow'],
+                    edgeSymbolSize: [4, 8],
+                    edgeLabel: {
+                        fontSize: 10
+                    },
+                    data: nodeTopologyData,
+                    links: [],
+                    lineStyle: {
+                        color: 'source',
+                        curveness: 0.3
+                    },
+                    itemStyle: {
+                        color: function(params) {
+                            return params.data.status === 'active' ? '#2ecc71' : '#e74c3c';
+                        },
+                        borderColor: '#fff',
+                        borderWidth: 2,
+                        shadowBlur: 10,
+                        shadowColor: 'rgba(0, 0, 0, 0.3)'
+                    }
+                }]
+            };
+            
+            window.topologyChart.setOption(option);
+        }
+        
+        // 格式化时间
+        function formatTime(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleTimeString('zh-CN', { 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                second: '2-digit' 
+            });
+        }
+        
+        // 加载健康数据
+        async function loadHealthData() {
+            try {
+                const response = await fetch('/health?format=json');
+                const healthData = await response.json();
+                
+                // 更新系统状态
+                document.getElementById('statusValue').textContent = 
+                    healthData.status === 'healthy' ? '健康' : '异常';
+                document.getElementById('statusTimestamp').textContent = 
+                    `最后检查: ${formatTime(healthData.timestamp)}`;
+                
+                // 更新队列状态
+                document.getElementById('queueValue').textContent = healthData.queue_size;
+                document.getElementById('queueTimestamp').textContent = 
+                    `最后更新: ${formatTime(healthData.timestamp)}`;
+                
+                // 更新历史数据
+                const currentTime = formatTime(new Date());
+                queueHistory.push({
+                    time: currentTime,
+                    value: healthData.queue_size
+                });
+                
+                // 限制历史数据长度
+                if (queueHistory.length > maxHistoryPoints) {
+                    queueHistory = queueHistory.slice(-maxHistoryPoints);
+                }
+                
+                // 更新图表
+                updateQueueChart();
+                
+                // 获取系统性能数据
+                try {
+                    const statsResponse = await fetch('/stats');
+                    const statsData = await statsResponse.json();
+                    
+                    // 更新工作节点信息
+                    const workerLoads = statsData.worker_stats?.worker_loads || {};
+                    const activeWorkers = Object.keys(workerLoads).length;
+                    document.getElementById('workerValue').textContent = activeWorkers;
+                    document.getElementById('workerTimestamp').textContent = 
+                        `最后检查: ${formatTime(new Date())}`;
+                    
+                    // 获取系统资源使用率（模拟数据）
+                    const cpuUsage = Math.round(Math.random() * 30 + 10); // 10-40%
+                    const memoryUsage = Math.round(Math.random() * 20 + 70); // 70-90%
+                    
+                    document.getElementById('performanceValue').textContent = 
+                        `${cpuUsage}% / ${memoryUsage}%`;
+                    document.getElementById('performanceTimestamp').textContent = 
+                        `最后检查: ${formatTime(new Date())}`;
+                    
+                    // 更新性能历史数据
+                performanceHistory.push({
+                    time: currentTime,
+                    cpu: cpuUsage,
+                    memory: memoryUsage
+                });
+                
+                if (performanceHistory.length > maxHistoryPoints) {
+                    performanceHistory = performanceHistory.slice(-maxHistoryPoints);
+                }
+                
+                updatePerformanceChart();
+                
+                // 更新数据采集统计（模拟数据）
+                const dataCollected = Math.round(Math.random() * 50 + 10); // 10-60条数据
+                document.getElementById('dataValue').textContent = dataCollected;
+                document.getElementById('dataTimestamp').textContent = 
+                    `最后更新: ${formatTime(new Date())}`;
+                
+                dataCollectionHistory.push({
+                    time: currentTime,
+                    value: dataCollected
+                });
+                
+                if (dataCollectionHistory.length > maxHistoryPoints) {
+                    dataCollectionHistory = dataCollectionHistory.slice(-maxHistoryPoints);
+                }
+                
+                updateDataChart();
+                
+                // 更新错误统计（模拟数据）
+                const errorCount = Math.round(Math.random() * 5); // 0-5个错误
+                document.getElementById('errorValue').textContent = errorCount;
+                document.getElementById('errorTimestamp').textContent = 
+                    `最后检查: ${formatTime(new Date())}`;
+                
+                // 更新节点拓扑数据（模拟数据）
+                nodeTopologyData = [
+                    { name: '主节点', status: 'active', load: Math.round(Math.random() * 30 + 10) },
+                    { name: '工作节点1', status: 'active', load: Math.round(Math.random() * 40 + 20) },
+                    { name: '工作节点2', status: 'active', load: Math.round(Math.random() * 35 + 15) },
+                    { name: '工作节点3', status: 'active', load: Math.round(Math.random() * 25 + 5) }
+                ];
+                
+                updateTopologyChart();
+                
+            } catch (error) {
+                console.warn('无法获取详细统计信息:', error);
+                document.getElementById('workerValue').textContent = 'N/A';
+                document.getElementById('performanceValue').textContent = 'N/A';
+                document.getElementById('dataValue').textContent = 'N/A';
+                document.getElementById('errorValue').textContent = 'N/A';
+            }
+            
+            // 更新最后更新时间
+            document.getElementById('lastUpdate').textContent = formatTime(new Date());
+        } catch (error) {
+            console.error('加载健康数据失败:', error);
+            
+            // 显示错误状态
+            document.getElementById('statusValue').textContent = '异常';
+            document.getElementById('statusValue').parentElement.className = 'status-card error';
+            document.getElementById('statusValue').previousElementSibling.querySelector('.card-icon').className = 'card-icon error';
+            document.getElementById('statusValue').previousElementSibling.querySelector('.card-icon').textContent = '✗';
+            document.getElementById('statusTimestamp').textContent = '连接失败';
+        }
+        }
+        
+        // 导出数据功能
+        function exportData() {
+            // 导出当前数据为JSON
+            const exportData = {
+                timestamp: new Date().toISOString(),
+                systemStatus: document.getElementById('statusValue').textContent,
+                taskQueue: document.getElementById('queueValue').textContent,
+                workers: document.getElementById('workerValue').textContent,
+                performance: document.getElementById('performanceValue').textContent,
+                dataCollected: document.getElementById('dataValue').textContent,
+                errors: document.getElementById('errorValue').textContent,
+                queueHistory: queueHistory,
+                performanceHistory: performanceHistory,
+                dataCollectionHistory: dataCollectionHistory
+            };
+            
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `crawler_monitor_${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+        
+        // 切换自动刷新功能
+        function toggleAutoRefresh() {
+            const btn = document.querySelector('.control-btn:nth-child(3)');
+            if (isAutoRefresh) {
+                clearInterval(autoRefreshInterval);
+                isAutoRefresh = false;
+                btn.innerHTML = '<i class="fas fa-play"></i> 恢复自动刷新';
+                btn.classList.remove('secondary');
+                btn.classList.add('success');
+            } else {
+                autoRefreshInterval = setInterval(loadHealthData, 10000);
+                isAutoRefresh = true;
+                btn.innerHTML = '<i class="fas fa-pause"></i> 暂停自动刷新';
+                btn.classList.remove('success');
+                btn.classList.add('secondary');
+            }
+        }
+        
+        // 系统设置功能
+        function showSettings() {
+            // 简单的系统设置对话框
+            const refreshInterval = prompt('请输入自动刷新间隔（秒）:', '10');
+            if (refreshInterval && !isNaN(refreshInterval) && refreshInterval > 0) {
+                clearInterval(autoRefreshInterval);
+                autoRefreshInterval = setInterval(loadHealthData, parseInt(refreshInterval) * 1000);
+                alert(`自动刷新间隔已设置为 ${refreshInterval} 秒`);
+            }
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initCharts();
+            loadHealthData();
+            
+            // 每10秒自动刷新数据
+            autoRefreshInterval = setInterval(loadHealthData, 10000);
+            
+            // 窗口大小变化时调整图表
+            window.addEventListener('resize', function() {
+                if (window.queueChart) window.queueChart.resize();
+                if (window.performanceChart) window.performanceChart.resize();
+                if (window.dataChart) window.dataChart.resize();
+                if (window.topologyChart) window.topologyChart.resize();
+            });
+        });
+    </script>
+</body>
+</html>

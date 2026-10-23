@@ -1,0 +1,138 @@
+version: '3.8'
+
+services:
+  # Redis服务 - 任务队列
+  redis:
+    image: redis:7-alpine
+    container_name: distributed_crawler_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    networks:
+      - crawler_network
+    restart: unless-stopped
+
+  # MongoDB服务 - 数据存储
+  mongodb:
+    image: mongo:6
+    container_name: distributed_crawler_mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password123
+      MONGO_INITDB_DATABASE: crawler_db
+    volumes:
+      - mongodb_data:/data/db
+      - ./init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+    networks:
+      - crawler_network
+    restart: unless-stopped
+
+  # 主节点服务
+  master:
+    build:
+      context: .
+      dockerfile: Dockerfile.master
+    container_name: distributed_crawler_master
+    ports:
+      - "8000:8000"
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - MONGODB_URI=mongodb://admin:password123@mongodb:27017/crawler_db?authSource=admin
+      - WORKER_COUNT=5
+      - TASK_BATCH_SIZE=100
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      - redis
+      - mongodb
+    networks:
+      - crawler_network
+    restart: unless-stopped
+
+  # 工作节点服务 (多个实例)
+  worker-1:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    container_name: distributed_crawler_worker_1
+    ports:
+      - "5001:5000"
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - MASTER_URL=http://master:8000
+      - WORKER_ID=worker-1
+      - MAX_THREADS=3
+    depends_on:
+      - redis
+      - master
+    networks:
+      - crawler_network
+    restart: unless-stopped
+
+  worker-2:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    container_name: distributed_crawler_worker_2
+    ports:
+      - "5002:5000"
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - MASTER_URL=http://master:8000
+      - WORKER_ID=worker-2
+      - MAX_THREADS=3
+    depends_on:
+      - redis
+      - master
+    networks:
+      - crawler_network
+    restart: unless-stopped
+
+  worker-3:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    container_name: distributed_crawler_worker_3
+    ports:
+      - "5003:5000"
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - MASTER_URL=http://master:8000
+      - WORKER_ID=worker-3
+      - MAX_THREADS=3
+    depends_on:
+      - redis
+      - master
+    networks:
+      - crawler_network
+    restart: unless-stopped
+
+  # 监控面板
+  monitor:
+    image: rediscommander/redis-commander:latest
+    container_name: distributed_crawler_monitor
+    ports:
+      - "8081:8081"
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    depends_on:
+      - redis
+    networks:
+      - crawler_network
+    restart: unless-stopped
+
+volumes:
+  redis_data:
+  mongodb_data:
+
+networks:
+  crawler_network:
+    driver: bridge

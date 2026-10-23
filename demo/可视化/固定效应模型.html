@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>固定效应模型回归结果可视化</title>
+    <script src='https://cdn.plot.ly/plotly-2.24.1.min.js'></script>
+    <style>
+        body {
+            font-family: "Arial", "Microsoft YaHei", sans-serif;
+            margin: 40px;
+            background-color: #f8f9fa;
+            color: #2c3e50;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.08);
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 5px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+        .chart-container {
+            margin: 20px 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+        .chart-box {
+            flex: 1 1 48%;
+            min-width: 500px;
+            margin: 10px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            padding: 15px;
+        }
+        .stats-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .stats-table th, .stats-table td {
+            border: 1px solid #e0e0e0;
+            padding: 10px;
+            text-align: center;
+        }
+        .stats-table th {
+            background-color: #f2f6fc;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .stats-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .stats-table tr:hover {
+            background-color: #f0f7ff;
+        }
+        .interpretation {
+            background-color: #f0f7fb;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 30px 0;
+            border-left: 5px solid #3498db;
+        }
+        .interpretation h3 {
+            color: #2980b9;
+            margin-top: 0;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 0.85em;
+            color: #95a5a6;
+        }
+        .download-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #27ae60;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            margin: 10px 5px;
+            cursor: pointer;
+        }
+        .download-btn:hover {
+            background-color: #219653;
+        }
+        .button-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .model-info {
+            background-color: #fff8e1;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 5px solid #ffc107;
+        }
+        .significance-legend {
+            display: flex;
+            justify-content: center;
+            margin: 15px 0;
+            font-size: 13px;
+        }
+        .significance-item {
+            margin: 0 15px;
+            display: flex;
+            align-items: center;
+        }
+        .significance-color {
+            width: 15px;
+            height: 15px;
+            margin-right: 5px;
+            border-radius: 50%;
+        }
+        @media (max-width: 1200px) {
+            .chart-box {
+                flex: 1 1 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>固定效应模型回归结果可视化</h1>
+        <div class="subtitle">地区固定效应模型 + 中心化变量 | 样本量: 21,769 | HC3稳健标准误</div>
+        
+        <!-- 模型信息 -->
+        <div class="model-info">
+            <h3>模型概要</h3>
+            <p><strong>因变量:</strong> china_africa_community_recognition (中非社区认可度)</p>
+            <p><strong>R²:</strong> 0.915 | <strong>调整后R²:</strong> 0.915 | <strong>F统计量:</strong> 1.364e+04 (p=0.000)</p>
+            <p><strong>固定效应:</strong> 地区固定效应（以东非为基准） | <strong>标准误:</strong> HC3稳健标准误</p>
+            <p><strong>备注:</strong> 条件数为1.6e+05，可能存在多重共线性问题</p>
+        </div>
+        
+        <!-- 图表容器 -->
+        <div class="chart-container">
+            <div class="chart-box">
+                <div id="coefficientPlot"></div>
+            </div>
+            <div class="chart-box">
+                <div id="significancePlot"></div>
+            </div>
+        </div>
+        
+        <!-- 显著性图例 -->
+        <div class="significance-legend">
+            <div class="significance-item">
+                <div class="significance-color" style="background-color: #e74c3c;"></div>
+                <span>p < 0.001 (高度显著)</span>
+            </div>
+            <div class="significance-item">
+                <div class="significance-color" style="background-color: #f39c12;"></div>
+                <span>p < 0.01 (非常显著)</span>
+            </div>
+            <div class="significance-item">
+                <div class="significance-color" style="background-color: #f1c40f;"></div>
+                <span>p < 0.05 (显著)</span>
+            </div>
+            <div class="significance-item">
+                <div class="significance-color" style="background-color: #95a5a6;"></div>
+                <span>p ≥ 0.05 (不显著)</span>
+            </div>
+        </div>
+        
+        <!-- 回归结果表格 -->
+        <table class="stats-table">
+            <tr>
+                <th>变量</th>
+                <th>系数</th>
+                <th>标准误</th>
+                <th>z值</th>
+                <th>P值</th>
+                <th>95%置信区间</th>
+                <th>显著性</th>
+            </tr>
+            <tr>
+                <td>const</td>
+                <td>0.2134</td>
+                <td>0.001</td>
+                <td>407.404</td>
+                <td>0.000</td>
+                <td>[0.212, 0.214]</td>
+                <td style="color: #e74c3c;">***</td>
+            </tr>
+            <tr>
+                <td>cooperation_willingness_advanced_centered</td>
+                <td>0.2691</td>
+                <td>0.017</td>
+                <td>15.486</td>
+                <td>0.000</td>
+                <td>[0.235, 0.303]</td>
+                <td style="color: #e74c3c;">***</td>
+            </tr>
+            <tr>
+                <td>development_demand_pca_centered</td>
+                <td>0.0616</td>
+                <td>0.005</td>
+                <td>12.740</td>
+                <td>0.000</td>
+                <td>[0.052, 0.071]</td>
+                <td style="color: #e74c3c;">***</td>
+            </tr>
+            <tr>
+                <td>normalized_sentiment_centered</td>
+                <td>0.7390</td>
+                <td>0.008</td>
+                <td>97.222</td>
+                <td>0.000</td>
+                <td>[0.724, 0.754]</td>
+                <td style="color: #e74c3c;">***</td>
+            </tr>
+            <tr>
+                <td>time_index</td>
+                <td>0.0112</td>
+                <td>0.010</td>
+                <td>1.089</td>
+                <td>0.276</td>
+                <td>[-0.009, 0.031]</td>
+                <td style="color: #95a5a6;">-</td>
+            </tr>
+            <tr>
+                <td>total_words_count</td>
+                <td>5.193e-07</td>
+                <td>1.12e-07</td>
+                <td>4.657</td>
+                <td>0.000</td>
+                <td>[3.01e-07, 7.38e-07]</td>
+                <td style="color: #e74c3c;">***</td>
+            </tr>
+            <tr>
+                <td>region_中非</td>
+                <td>0.0007</td>
+                <td>0.001</td>
+                <td>1.042</td>
+                <td>0.298</td>
+                <td>[-0.001, 0.002]</td>
+                <td style="color: #95a5a6;">-</td>
+            </tr>
+            <tr>
+                <td>region_北非</td>
+                <td>-0.0601</td>
+                <td>0.005</td>
+                <td>-13.160</td>
+                <td>0.000</td>
+                <td>[-0.069, -0.051]</td>
+                <td style="color: #e74c3c;">***</td>
+            </tr>
+            <tr>
+                <td>region_南非</td>
+                <td>-0.0461</td>
+                <td>0.002</td>
+                <td>-22.806</td>
+                <td>0.000</td>
+                <td>[-0.050, -0.042]</td>
+                <td style="color: #e74c3c;">***</td>
+            </tr>
+            <tr>
+                <td>region_西非</td>
+                <td>-0.0136</td>
+                <td>0.001</td>
+                <td>-12.430</td>
+                <td>0.000</td>
+                <td>[-0.016, -0.011]</td>
+                <td style="color: #e74c3c;">***</td>
+            </tr>
+        </table>
+        
+        <!-- 结果解读 -->
+        <div class="interpretation">
+            <h3>📊 回归结果解读</h3>
+            <p><strong>模型拟合优度:</strong> R²值为0.915，表明模型解释了因变量91.5%的变异，拟合效果极佳。</p>
+            <p><strong>关键变量影响:</strong></p>
+            <ul>
+                <li><strong>标准化情感(normalized_sentiment_centered)</strong>：系数为0.739，是影响中非社区认可度的最强预测因子，情感正向提升1个单位，认可度提升0.739个单位。</li>
+                <li><strong>合作意愿(cooperation_willingness_advanced_centered)</strong>：系数为0.269，对认可度有显著正向影响。</li>
+                <li><strong>发展需求(development_demand_pca_centered)</strong>：系数为0.062，影响相对较小但依然显著。</li>
+                <li><strong>地区效应</strong>：相对于基准地区(东非)，北非、南非和西非的认可度显著较低，其中北非最低(-0.060)。</li>
+            </ul>
+            <p><strong>不显著变量:</strong> 时间趋势(time_index)和中非地区效应(region_中非)在统计上不显著。</p>
+            <p><strong>模型诊断:</strong> 条件数较大(1.6e+05)，提示可能存在多重共线性问题，需谨慎解释系数。</p>
+        </div>
+        
+        <!-- 按钮 -->
+        <div class="button-container">
+            <a class="download-btn" onclick="downloadChart('coefficientPlot', 'png')">下载系数图(PNG)</a>
+            <a class="download-btn" onclick="downloadChart('significancePlot', 'png')">下载显著性图(PNG)</a>
+            <a class="download-btn" onclick="downloadAllCharts()">下载所有图表(ZIP)</a>
+        </div>
+        
+        <div class="footer">
+            <p>可视化生成时间: <span id="currentTime"></span> | 基于Plotly.js构建 | 回归结果可视化最佳实践</p>
+        </div>
+    </div>
+
+    <script>
+        // 设置当前时间
+        document.getElementById('currentTime').textContent = new Date().toLocaleString();
+        
+        // 回归数据
+        const regressionData = [
+            {
+                variable: "const",
+                coefficient: 0.2134,
+                std_err: 0.001,
+                z_value: 407.404,
+                p_value: 0.000,
+                ci_lower: 0.212,
+                ci_upper: 0.214
+            },
+            {
+                variable: "合作意愿(中心化)",
+                coefficient: 0.2691,
+                std_err: 0.017,
+                z_value: 15.486,
+                p_value: 0.000,
+                ci_lower: 0.235,
+                ci_upper: 0.303
+            },
+            {
+                variable: "发展需求PCA(中心化)",
+                coefficient: 0.0616,
+                std_err: 0.005,
+                z_value: 12.740,
+                p_value: 0.000,
+                ci_lower: 0.052,
+                ci_upper: 0.071
+            },
+            {
+                variable: "标准化情感(中心化)",
+                coefficient: 0.7390,
+                std_err: 0.008,
+                z_value: 97.222,
+                p_value: 0.000,
+                ci_lower: 0.724,
+                ci_upper: 0.754
+            },
+            {
+                variable: "时间趋势",
+                coefficient: 0.0112,
+                std_err: 0.010,
+                z_value: 1.089,
+                p_value: 0.276,
+                ci_lower: -0.009,
+                ci_upper: 0.031
+            },
+            {
+                variable: "总词数",
+                coefficient: 0.0000005193,
+                std_err: 0.000000112,
+                z_value: 4.657,
+                p_value: 0.000,
+                ci_lower: 0.000000301,
+                ci_upper: 0.000000738
+            },
+            {
+                variable: "地区: 中非",
+                coefficient: 0.0007,
+                std_err: 0.001,
+                z_value: 1.042,
+                p_value: 0.298,
+                ci_lower: -0.001,
+                ci_upper: 0.002
+            },
+            {
+                variable: "地区: 北非",
+                coefficient: -0.0601,
+                std_err: 0.005,
+                z_value: -13.160,
+                p_value: 0.000,
+                ci_lower: -0.069,
+                ci_upper: -0.051
+            },
+            {
+                variable: "地区: 南非",
+                coefficient: -0.0461,
+                std_err: 0.002,
+                z_value: -22.806,
+                p_value: 0.000,
+                ci_lower: -0.050,
+                ci_upper: -0.042
+            },
+            {
+                variable: "地区: 西非",
+                coefficient: -0.0136,
+                std_err: 0.001,
+                z_value: -12.430,
+                p_value: 0.000,
+                ci_lower: -0.016,
+                ci_upper: -0.011
+            }
+        ];
+        
+        // 根据p值确定颜色和显著性标记
+        function getSignificanceInfo(pValue) {
+            if (pValue < 0.001) {
+                return {color: '#e74c3c', symbol: '***'};
+            } else if (pValue < 0.01) {
+                return {color: '#f39c12', symbol: '**'};
+            } else if (pValue < 0.05) {
+                return {color: '#f1c40f', symbol: '*'};
+            } else {
+                return {color: '#95a5a6', symbol: ''};
+            }
+        }
+        
+        // 创建系数图
+        function createCoefficientPlot() {
+            const variables = regressionData.map(d => d.variable);
+            const coefficients = regressionData.map(d => d.coefficient);
+            const ciLower = regressionData.map(d => d.ci_lower);
+            const ciUpper = regressionData.map(d => d.ci_upper);
+            const pValues = regressionData.map(d => d.p_value);
+            
+            const colors = pValues.map(p => getSignificanceInfo(p).color);
+            
+            // 为每个变量创建误差线
+            const errorBars = {
+                type: 'data',
+                symmetric: false,
+                array: ciUpper.map((upper, i) => upper - coefficients[i]),
+                arrayminus: coefficients.map((coef, i) => coef - ciLower[i]),
+                thickness: 1.5,
+                width: 5,
+                color: '#7f8c8d'
+            };
+            
+            const trace = {
+                x: coefficients,
+                y: variables,
+                type: 'scatter',
+                mode: 'markers',
+                marker: {
+                    size: 12,
+                    color: colors,
+                    line: {
+                        color: 'rgba(0,0,0,0.5)',
+                        width: 1
+                    }
+                },
+                error_x: errorBars,
+                hovertemplate: '<b>%{y}</b><br>系数: %{x:.4f}<br>95% CI: [%{customdata[0]:.3f}, %{customdata[1]:.3f}]<br>p值: %{customdata[2]:.3f}<extra></extra>',
+                customdata: regressionData.map(d => [d.ci_lower, d.ci_upper, d.p_value])
+            };
+            
+            const layout = {
+                title: {
+                    text: '<b>固定效应模型系数估计与95%置信区间</b>',
+                    font: { size: 18 }
+                },
+                xaxis: {
+                    title: '<b>系数估计值</b>',
+                    gridcolor: '#e1e5e9',
+                    zeroline: true,
+                    zerolinecolor: '#7f8c8d',
+                    zerolinewidth: 2
+                },
+                yaxis: {
+                    title: '<b>解释变量</b>',
+                    gridcolor: '#e1e5e9',
+                    categoryorder: 'total ascending'
+                },
+                plot_bgcolor: 'rgba(248,249,250,0.8)',
+                paper_bgcolor: 'rgba(255,255,255,1)',
+                margin: { l: 150, r: 40, t: 80, b: 70 },
+                height: 600,
+                shapes: [
+                    {
+                        type: 'line',
+                        x0: 0,
+                        x1: 0,
+                        y0: -0.5,
+                        y1: variables.length - 0.5,
+                        line: {
+                            color: '#7f8c8d',
+                            width: 2,
+                            dash: 'dash'
+                        }
+                    }
+                ]
+            };
+            
+            Plotly.newPlot('coefficientPlot', [trace], layout, {
+                responsive: true,
+                displayModeBar: true,
+                displaylogo: false
+            });
+        }
+        
+        // 创建显著性热图
+        function createSignificancePlot() {
+            // 准备数据：系数值和p值
+            const variables = regressionData.map(d => d.variable);
+            const coefficients = regressionData.map(d => d.coefficient);
+            const pValues = regressionData.map(d => d.p_value);
+            
+            // 创建热图数据
+            const zValues = [
+                coefficients.map(c => Math.abs(c)), // 系数绝对值（表示影响大小）
+                pValues.map(p => -Math.log10(p))    // -log10(p)（表示显著性强度）
+            ];
+            
+            const heatmapTrace = {
+                z: zValues,
+                x: variables,
+                y: ['系数绝对值', '显著性强度(-log10(p))'],
+                type: 'heatmap',
+                colorscale: [
+                    [0, '#ecf0f1'],
+                    [0.2, '#d5dbdb'],
+                    [0.4, '#aab7b8'],
+                    [0.6, '#7f8c8d'],
+                    [0.8, '#566573'],
+                    [1, '#2c3e50']
+                ],
+                showscale: true,
+                hovertemplate: '<b>%{x}</b><br>%{y}: %{z:.3f}<extra></extra>'
+            };
+            
+            const layout = {
+                title: {
+                    text: '<b>变量影响强度与显著性热图</b>',
+                    font: { size: 18 }
+                },
+                xaxis: {
+                    title: '<b>解释变量</b>',
+                    tickangle: -45
+                },
+                yaxis: {
+                    title: '<b>指标</b>'
+                },
+                plot_bgcolor: 'rgba(248,249,250,0.8)',
+                paper_bgcolor: 'rgba(255,255,255,1)',
+                margin: { l: 120, r: 40, t: 80, b: 120 },
+                height: 400
+            };
+            
+            Plotly.newPlot('significancePlot', [heatmapTrace], layout, {
+                responsive: true,
+                displayModeBar: true,
+                displaylogo: false
+            });
+        }
+        
+        // 初始化图表
+        createCoefficientPlot();
+        createSignificancePlot();
+        
+        // 下载功能
+        function downloadChart(chartId, format) {
+            Plotly.downloadImage(chartId, {
+                format: format,
+                width: 1200,
+                height: 700,
+                filename: '固定效应模型_' + chartId + '_' + new Date().toISOString().slice(0,10)
+            });
+        }
+        
+        function downloadAllCharts() {
+            downloadChart('coefficientPlot', 'png');
+            setTimeout(() => {
+                downloadChart('significancePlot', 'png');
+            }, 1000);
+            alert('两张图表将依次下载，请查看浏览器下载列表');
+        }
+        
+        // 窗口调整大小时重绘图表
+        window.addEventListener('resize', function() {
+            Plotly.Plots.resize('coefficientPlot');
+            Plotly.Plots.resize('significancePlot');
+        });
+
+    </script>
+</body>
+</html>

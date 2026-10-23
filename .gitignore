@@ -1,0 +1,11 @@
+restored/
+.env
+.env.*
+!.env.example
+node_modules/
+__pycache__/
+*.pyc
+*.log
+.venv/
+.DS_Store
+Thumbs.db

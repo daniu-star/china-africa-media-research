@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中非共同体认知研究的中介效应分析</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.0.2"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #1a365d;
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #2b6cb0;
+            padding-bottom: 10px;
+        }
+        .chart-container {
+            margin: 30px 0;
+            position: relative;
+            height: 400px;
+        }
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .info-panel {
+            background: #edf2f7;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        .legend {
+            display: flex;
+            justify-content: center;
+            margin: 15px 0;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 0 15px;
+        }
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            margin-right: 8px;
+            border-radius: 4px;
+        }
+        .path-diagram {
+            text-align: center;
+            margin: 30px 0;
+        }
+        .path-line {
+            stroke: #2b6cb0;
+            stroke-width: 3;
+            fill: none;
+        }
+        .path-arrow {
+            fill: #2b6cb0;
+        }
+        .node {
+            fill: #3182ce;
+            stroke: #1a365d;
+            stroke-width: 2;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .node:hover {
+            fill: #63b3ed;
+            transform: scale(1.05);
+        }
+        .node-text {
+            fill: white;
+            font-weight: bold;
+            font-size: 16px;
+            text-anchor: middle;
+            pointer-events: none;
+        }
+        .path-text {
+            fill: #2d3748;
+            font-size: 14px;
+            font-weight: bold;
+            text-anchor: middle;
+        }
+        .effect-bar {
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .effect-bar:hover {
+            opacity: 0.8;
+        }
+        .tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 100;
+        }
+        .stat-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .stat-table th, .stat-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+        }
+        .stat-table th {
+            background-color: #2b6cb0;
+            color: white;
+        }
+        .stat-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>中非共同体认知研究的中介效应分析</h1>
+        
+        <div class="path-diagram">
+            <h2>中介效应路径图</h2>
+            <svg width="800" height="300" id="path-svg">
+                <!-- 路径线条 -->
+                <path d="M100,150 L250,150" class="path-line" id="path-x-y"></path>
+                <path d="M100,150 L250,50" class="path-line" id="path-x-m"></path>
+                <path d="M250,50 L400,150" class="path-line" id="path-m-y"></path>
+                
+                <!-- 箭头 -->
+                <polygon points="260,150 250,145 250,155" class="path-arrow"></polygon>
+                <polygon points="260,50 250,45 250,55" class="path-arrow"></polygon>
+                <polygon points="410,150 400,145 400,155" class="path-arrow"></polygon>
+                
+                <!-- 节点 -->
+                <circle cx="100" cy="150" r="40" class="node" id="node-x"></circle>
+                <circle cx="250" cy="50" r="40" class="node" id="node-m"></circle>
+                <circle cx="400" cy="150" r="40" class="node" id="node-y"></circle>
+                
+                <!-- 节点文本 -->
+                <text x="100" y="155" class="node-text">X</text>
+                <text x="250" y="55" class="node-text">M</text>
+                <text x="400" y="155" class="node-text">Y</text>
+                
+                <!-- 路径系数文本 -->
+                <text x="175" y="140" class="path-text">c' = 0.0440 (p=0.4800)</text>
+                <text x="175" y="40" class="path-text">a = 0.6989</text>
+                <text x="325" y="40" class="path-text">b = 0.8421</text>
+                
+                <!-- 变量标签 -->
+                <text x="100" y="210" class="path-text" font-weight="bold">发展需求感知</text>
+                <text x="250" y="10" class="path-text" font-weight="bold">情感强度</text>
+                <text x="400" y="210" class="path-text" font-weight="bold">中非共同体认知</text>
+            </svg>
+        </div>
+        
+        <div class="grid-container">
+            <div>
+                <h2>效应分解与置信区间</h2>
+                <div class="chart-container">
+                    <canvas id="effectChart"></canvas>
+                </div>
+            </div>
+            <div>
+                <h2>路径系数与统计显著性</h2>
+                <div class="chart-container">
+                    <canvas id="pathChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="info-panel">
+            <h2>模型拟合与统计结果</h2>
+            <table class="stat-table">
+                <thead>
+                    <tr>
+                        <th>统计指标</th>
+                        <th>值</th>
+                        <th>说明</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>模型R²</td>
+                        <td>0.915</td>
+                        <td>模型解释力强</td>
+                    </tr>
+                    <tr>
+                        <td>中介效应占比</td>
+                        <td>93.04%</td>
+                        <td>情感强度中介作用显著</td>
+                    </tr>
+                    <tr>
+                        <td>Bootstrap抽样次数</td>
+                        <td>1000</td>
+                        <td>结果稳健可靠</td>
+                    </tr>
+                    <tr>
+                        <td>置信水平</td>
+                        <td>95%</td>
+                        <td>标准统计置信水平</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #3182ce;"></div>
+                <span>直接效应</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #63b3ed;"></div>
+                <span>间接效应</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #90cdf4;"></div>
+                <span>总效应</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="tooltip" id="tooltip"></div>
+
+    <script>
+        // 效应分解图表
+        const effectCtx = document.getElementById('effectChart').getContext('2d');
+        const effectChart = new Chart(effectCtx, {
+            type: 'bar',
+            data: {
+                labels: ['直接效应', '间接效应', '总效应'],
+                datasets: [{
+                    label: '效应值',
+                    data: [0.0440, 0.5886, 0.6326],
+                    backgroundColor: [
+                        'rgba(49, 130, 206, 0.7)',
+                        'rgba(99, 179, 237, 0.7)',
+                        'rgba(144, 205, 244, 0.7)'
+                    ],
+                    borderColor: [
+                        'rgb(49, 130, 206)',
+                        'rgb(99, 179, 237)',
+                        'rgb(144, 205, 244)'
+                    ],
+                    borderWidth: 1
+                }, {
+                    label: '置信区间下限',
+                    data: [0.0341, 0.5693, 0.6119],
+                    type: 'line',
+                    fill: false,
+                    borderColor: 'rgba(178, 34, 34, 0.7)',
+                    borderDash: [5, 5],
+                    pointBackgroundColor: 'rgba(178, 34, 34, 0.7)',
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                }, {
+                    label: '置信区间上限',
+                    data: [0.0540, 0.6090, 0.6533],
+                    type: 'line',
+                    fill: false,
+                    borderColor: 'rgba(34, 139, 34, 0.7)',
+                    borderDash: [5, 5],
+                    pointBackgroundColor: 'rgba(34, 139, 34, 0.7)',
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: '中介效应分解与95%置信区间',
+                        font: {
+                            size: 16
+                        }
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                label += context.parsed.y.toFixed(4);
+                                
+                                if (context.datasetIndex === 0) {
+                                    // 添加p值信息
+                                    const pValues = [0.4800, 0.5210, 0.5030];
+                                    label += ` (p=${pValues[context.dataIndex]})`;
+                                }
+                                return label;
+                            }
+                        }
+                    },
+                    annotation: {
+                        annotations: {
+                            line1: {
+                                type: 'line',
+                                yMin: 0.5693,
+                                yMax: 0.5693,
+                                borderColor: 'rgba(178, 34, 34, 0.7)',
+                                borderWidth: 2,
+                                label: {
+                                    enabled: true,
+                                    content: '下限',
+                                    position: 'start'
+                                }
+                            },
+                            line2: {
+                                type: 'line',
+                                yMin: 0.6090,
+                                yMax: 0.6090,
+                                borderColor: 'rgba(34, 139, 34, 0.7)',
+                                borderWidth: 2,
+                                label: {
+                                    enabled: true,
+                                    content: '上限',
+                                    position: 'end'
+                                }
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: '效应值'
+                        },
+                        max: 0.7
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: '效应类型'
+                        }
+                    }
+                }
+            }
+        });
+
+        // 路径系数图表
+        const pathCtx = document.getElementById('pathChart').getContext('2d');
+        const pathChart = new Chart(pathCtx, {
+            type: 'bar',
+            data: {
+                labels: ['a路径 (X→M)', 'b路径 (M→Y)', "c'路径 (X→Y)"],
+                datasets: [{
+                    label: '路径系数',
+                    data: [0.6989, 0.8421, 0.0440],
+                    backgroundColor: [
+                        'rgba(49, 130, 206, 0.7)',
+                        'rgba(99, 179, 237, 0.7)',
+                        'rgba(144, 205, 244, 0.7)'
+                    ],
+                    borderColor: [
+                        'rgb(49, 130, 206)',
+                        'rgb(99, 179, 237)',
+                        'rgb(144, 205, 244)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: '中介路径系数',
+                        font: {
+                            size: 16
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                label += context.parsed.y.toFixed(4);
+                                
+                                // 添加路径说明
+                                const descriptions = [
+                                    '发展需求感知 → 情感强度',
+                                    '情感强度 → 中非共同体认知',
+                                    '发展需求感知 → 中非共同体认知（控制中介）'
+                                ];
+                                label += `\n${descriptions[context.dataIndex]}`;
+                                
+                                return label;
+                            }
+                        }
+                    },
+                    datalabels: {
+                        anchor: 'end',
+                        align: 'top',
+                        formatter: function(value, context) {
+                            return value.toFixed(4);
+                        },
+                        color: '#2d3748',
+                        font: {
+                            weight: 'bold'
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: '路径系数值'
+                        },
+                        max: 1.0
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: '路径类型'
+                        }
+                    }
+                }
+            },
+            plugins: [ChartDataLabels]
+        });
+
+        // 添加路径图的交互效果
+        const nodes = document.querySelectorAll('.node');
+        const tooltip = document.getElementById('tooltip');
+        
+        nodes.forEach(node => {
+            node.addEventListener('mouseover', function(e) {
+                const id = this.id;
+                let content = '';
+                
+                if (id === 'node-x') {
+                    content = '自变量: 发展需求感知<br>中心化处理后的主变量';
+                } else if (id === 'node-m') {
+                    content = '中介变量: 情感强度<br>标准化处理后的情感指标';
+                } else if (id === 'node-y') {
+                    content = '因变量: 中非共同体认知<br>非洲国家对华共同体认知指标';
+                }
+                
+                tooltip.innerHTML = content;
+                tooltip.style.opacity = 1;
+                tooltip.style.left = (e.pageX + 10) + 'px';
+                tooltip.style.top = (e.pageY + 10) + 'px';
+            });
+            
+            node.addEventListener('mousemove', function(e) {
+                tooltip.style.left = (e.pageX + 10) + 'px';
+                tooltip.style.top = (e.pageY + 10) + 'px';
+            });
+            
+            node.addEventListener('mouseout', function() {
+                tooltip.style.opacity = 0;
+            });
+        });
+
+        // 添加路径线的交互效果
+        const pathLines = document.querySelectorAll('.path-line');
+        
+        pathLines.forEach(line => {
+            line.addEventListener('mouseover', function() {
+                this.style.strokeWidth = '5';
+                this.style.stroke = '#1a365d';
+            });
+            
+            line.addEventListener('mouseout', function() {
+                this.style.strokeWidth = '3';
+                this.style.stroke = '#2b6cb0';
+            });
+        });
+    </script>
+</body>
+</html>

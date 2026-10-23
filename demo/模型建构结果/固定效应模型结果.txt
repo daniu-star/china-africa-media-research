@@ -1,0 +1,43 @@
+固定效应模型结果（地区固定效应 + 中心化变量）
+==================================================
+
+                                    OLS Regression Results                                    
+==============================================================================================
+Dep. Variable:     china_africa_community_recognition   R-squared:                       0.915
+Model:                                            OLS   Adj. R-squared:                  0.915
+Method:                                 Least Squares   F-statistic:                 1.364e+04
+Date:                                Fri, 05 Dec 2025   Prob (F-statistic):               0.00
+Time:                                        15:20:33   Log-Likelihood:                 36957.
+No. Observations:                               21769   AIC:                        -7.389e+04
+Df Residuals:                                   21759   BIC:                        -7.381e+04
+Df Model:                                           9                                         
+Covariance Type:                                  HC3                                         
+=============================================================================================================
+                                                coef    std err          z      P>|z|      [0.025      0.975]
+-------------------------------------------------------------------------------------------------------------
+const                                         0.2134      0.001    407.404      0.000       0.212       0.214
+cooperation_willingness_advanced_centered     0.2691      0.017     15.486      0.000       0.235       0.303
+development_demand_pca_centered               0.0616      0.005     12.740      0.000       0.052       0.071
+normalized_sentiment_centered                 0.7390      0.008     97.222      0.000       0.724       0.754
+time_index                                    0.0112      0.010      1.089      0.276      -0.009       0.031
+total_words_count                          5.193e-07   1.12e-07      4.657      0.000    3.01e-07    7.38e-07
+region_中非                                     0.0007      0.001      1.042      0.298      -0.001       0.002
+region_北非                                    -0.0601      0.005    -13.160      0.000      -0.069      -0.051
+region_南非                                    -0.0461      0.002    -22.806      0.000      -0.050      -0.042
+region_西非                                    -0.0136      0.001    -12.430      0.000      -0.016      -0.011
+==============================================================================
+Omnibus:                    12036.066   Durbin-Watson:                   1.120
+Prob(Omnibus):                  0.000   Jarque-Bera (JB):           347512.152
+Skew:                           2.115   Prob(JB):                         0.00
+Kurtosis:                      22.111   Cond. No.                     1.60e+05
+==============================================================================
+
+Notes:
+[1] Standard Errors are heteroscedasticity robust (HC3)
+[2] The condition number is large, 1.6e+05. This might indicate that there are
+strong multicollinearity or other numerical problems.
+
+==================================================
+注：1. 使用地区固定效应（以东非为基准）
+   2. 使用HC3稳健标准误，控制异方差问题
+   3. 符合豪斯曼检验结果要求

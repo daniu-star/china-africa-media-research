@@ -1,0 +1,4 @@
+archive/* -text -diff
+*.docx -text
+*.png -text
+*.pdf -text

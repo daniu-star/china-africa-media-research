@@ -1,0 +1,29 @@
+豪斯曼检验结果
+==============================
+
+检验统计量: 67.9061
+自由度: 6
+p值: 0.0000
+
+结论: p值 < 0.05，拒绝原假设，建议使用固定效应模型
+
+==============================
+模型关键系数结果
+==============================
+固定效应模型系数:
+const                              -0.071381
+cooperation_willingness_advanced    0.240197
+development_demand_pca              0.054956
+time_index                         -0.024684
+total_words_count                   0.000003
+normalized_sentiment                0.748784
+Name: parameter, dtype: float64
+
+随机效应模型系数:
+const                              -0.068100
+cooperation_willingness_advanced    0.243688
+development_demand_pca              0.056248
+time_index                         -0.026250
+total_words_count                   0.000001
+normalized_sentiment                0.747159
+Name: parameter, dtype: float64

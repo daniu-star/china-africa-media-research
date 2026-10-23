@@ -1,0 +1,22 @@
+=== 合作纵深性指数融合信息 ===
+
+1. 原始文件信息:
+   - 记录数: 19435
+   - 字段数: 87
+
+2. 完整指数文件信息:
+   - 记录数: 19435
+   - 字段数: 87
+
+3. URL差异:
+   - 仅存在于原始文件中的URL数: 0
+   - 仅存在于完整指数文件中的URL数: 0
+   - 两个文件共有的URL数: 18042
+
+4. 原始文件合作纵深性指数完整性:
+   - long_term_word_count: 19435/19435
+   - has_multi_agent_interaction: 19435/19435
+   - long_term_word_count_log: 19435/19435
+   - long_term_percentile: 19435/19435
+   - multi_agent_percentile: 19435/19435
+   - cooperation_depth_index: 19435/19435

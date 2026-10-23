@@ -1,0 +1,37 @@
+稳健OLS模型结果（使用中心化变量）
+==================================================
+
+                                    OLS Regression Results                                    
+==============================================================================================
+Dep. Variable:     china_africa_community_recognition   R-squared:                       0.911
+Model:                                            OLS   Adj. R-squared:                  0.911
+Method:                                 Least Squares   F-statistic:                 1.967e+04
+Date:                                Fri, 05 Dec 2025   Prob (F-statistic):               0.00
+Time:                                        15:13:50   Log-Likelihood:                 36355.
+No. Observations:                               21769   AIC:                        -7.270e+04
+Df Residuals:                                   21763   BIC:                        -7.265e+04
+Df Model:                                           5                                         
+Covariance Type:                                  HC3                                         
+=============================================================================================================
+                                                coef    std err          z      P>|z|      [0.025      0.975]
+-------------------------------------------------------------------------------------------------------------
+const                                         0.2111      0.001    412.357      0.000       0.210       0.212
+cooperation_willingness_advanced_centered     0.2805      0.021     13.567      0.000       0.240       0.321
+development_demand_pca_centered               0.0699      0.005     12.933      0.000       0.059       0.080
+normalized_sentiment_centered                 0.7298      0.009     78.906      0.000       0.712       0.748
+time_index                                   -0.0481      0.009     -5.144      0.000      -0.066      -0.030
+total_words_count                           5.18e-07   1.32e-07      3.924      0.000    2.59e-07    7.77e-07
+==============================================================================
+Omnibus:                    10612.018   Durbin-Watson:                   1.033
+Prob(Omnibus):                  0.000   Jarque-Bera (JB):           333579.464
+Skew:                           1.737   Prob(JB):                         0.00
+Kurtosis:                      21.860   Cond. No.                     1.56e+05
+==============================================================================
+
+Notes:
+[1] Standard Errors are heteroscedasticity robust (HC3)
+[2] The condition number is large, 1.56e+05. This might indicate that there are
+strong multicollinearity or other numerical problems.
+
+==================================================
+注：使用HC3稳健标准误，控制了异方差问题

@@ -1,0 +1,21 @@
+=== 数据结构和字段匹配关系分析结果 ===
+
+1. 文件基本信息:
+   - 固定文件: 记录数=21769, 字段数=30
+   - 原始合作纵深性文件: 记录数=19435, 字段数=87
+
+2. 合作纵深性相关字段:
+   - long_term_word_count: 存在
+   - has_multi_agent_interaction: 存在
+   - long_term_word_count_log: 存在
+   - long_term_percentile: 存在
+   - multi_agent_percentile: 存在
+   - cooperation_depth_index: 存在
+   - long_term_word_count_scaled: 存在
+   - has_multi_agent_interaction_scaled: 存在
+
+3. 匹配键分析:
+   - 固定文件匹配键唯一值: 4487
+   - 原始文件匹配键唯一值: 4511
+   - 重叠匹配键数: 0
+   - 重叠比例: 0.00%

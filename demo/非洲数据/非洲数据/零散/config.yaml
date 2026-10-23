@@ -1,0 +1,96 @@
+# 分布式爬虫配置文件
+
+# 主节点配置
+master:
+  host: "0.0.0.0"
+  port: 8000
+  debug: false
+  log_level: "INFO"
+  
+# Redis配置
+redis:
+  host: "localhost"
+  port: 6379
+  db: 0
+  password: ""
+  
+# MongoDB配置（可选）
+mongodb:
+  host: "localhost"
+  port: 27017
+  database: "distributed_crawler"
+  username: "admin"
+  password: "REDACTED_LOCAL_SECRET"
+  
+# 存储配置
+storage:
+  type: "file"  # file, redis, mongodb
+  data_dir: "./data"
+  
+# 工作节点配置 - 大规模数据抓取优化版
+worker:
+  max_threads: 16  # 优化并行线程数，平衡性能与稳定性
+  max_retries: 5  # 增加重试次数，提高成功率
+  request_timeout: 90  # 优化请求超时，应对复杂网络环境
+  task_timeout: 300  # 增加任务超时，支持复杂任务
+  user_agent_rotation: true
+  proxy_enabled: false  # 禁用代理支持，使用直接连接
+  proxy_file: "proxies.txt"
+  skip_failed_sites: false  # 关闭跳过失败网站，提高数据完整性
+  fast_fail: false  # 关闭快速失败，提高任务完成率
+  skip_on_any_error: false  # 关闭错误跳过，提高数据完整性
+  connection_retry_delay: 10  # 连接重试延迟时间
+  max_connection_retries: 10  # 最大连接重试次数
+  heartbeat_timeout: 30  # 心跳超时时间
+  
+# 爬虫配置 - 大规模数据抓取优化版
+crawler:
+  max_articles_per_keyword: 200  # 增加目标数量，支持大规模抓取
+  max_retries: 3  # 增加重试次数，提高成功率
+  retry_delay: 10  # 增加重试延迟，避免频繁重试
+  timeout: 60  # 大幅增加超时时间，应对大规模抓取
+  user_agents:
+    - "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    - "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    - "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    - "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/121.0"
+    - "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15"
+  request_delay: 3  # 适当增加请求间隔，平衡效率与稳定性
+  max_requests_per_minute: 50  # 大幅增加每分钟请求数，提高效率
+  africa_optimization: true  # 启用非洲网站优化
+  skip_problematic_sites: false  # 关闭跳过问题网站，提高数据完整性
+  aggressive_skip: false  # 关闭激进跳过策略
+  skip_on_timeout: false  # 关闭超时跳过，提高任务完成率
+  skip_on_403: false  # 关闭403跳过，提高数据完整性
+  skip_on_404: false  # 关闭404跳过，提高数据完整性
+  
+# 监控配置
+monitoring:
+  heartbeat_interval: 15  # 缩短心跳间隔，提高响应性
+  cleanup_interval: 180  # 缩短清理间隔，及时释放资源
+  performance_check_interval: 30  # 缩短性能检查间隔，实时监控
+  
+# 网络配置 - 大规模数据抓取优化版
+network:
+  max_connections: 100  # 优化最大连接数，平衡性能与稳定性
+  connection_timeout: 60  # 优化连接超时，提高响应速度
+  read_timeout: 180  # 优化读取超时，应对慢速响应
+  keep_alive: true  # 启用连接保持
+  retry_on_connection_failure: true  # 连接失败时自动重试
+  connection_pool_size: 30  # 优化连接池大小，提高连接复用
+  connection_retry_backoff: 2  # 连接重试退避系数
+  max_connection_retries: 5  # 最大连接重试次数
+  connection_health_check: true  # 启用连接健康检查
+  
+# 安全配置
+security:
+  rate_limit_per_minute: 120  # 增加每分钟请求限制
+  max_request_size: "50MB"  # 增加最大请求大小
+  cors_origins: ["*"]
+  
+# 日志配置
+logging:
+  level: "INFO"
+  file: "distributed_crawler.log"
+  max_size: "100MB"
+  backup_count: 5

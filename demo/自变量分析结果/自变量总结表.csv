@@ -1,0 +1,5 @@
+﻿自变量名称,变量类型,计算公式,取值范围/类别,信度
+时间变量,数值型,time_index = year(date),0-2025,单指标
+合作意愿,数值型,"cooperation_willingness_advanced = 标准化(平滑(余弦相似度(文本嵌入, 合作主题嵌入)))",0-1,4.23/5.0
+发展需求感知,数值型,development_demand_pca = PCA(development_features),,0.6945
+报道来源区域,分类型,source_region_5 = 分类(source),北非、西非、东非、南非、中非,单指标
